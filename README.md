@@ -1,84 +1,63 @@
-# Blog API — Homework 2
+# Blog API - Homework 2 & 3
 
-## Project Description
-
-This project is a Django Blog API with a customized Django Unfold administration panel.
+This is my Django Blog API project.
 
 ## Technologies
 - Python
 - Django
 - Django REST Framework
 - Django Unfold
-- Faker
 - SQLite
-## Installation
+- Faker
 
-Create a virtual environment:
+## How to Run
 
-```powershell
-python -m venv .venv
+Install requirements:
 ```
-
-Activate it on Windows:
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-Install dependencies:
-
-```powershell
 pip install -r requirements/base.txt
 ```
 
-## Database Setup
 Run migrations:
-
-```powershell
+```
 python manage.py migrate
 ```
 
-Generate sample data:
-
-```powershell
+Create sample data:
+```
 python manage.py seed
 ```
 
-Generate a specific amount of data:
-
-```powershell
-python manage.py seed --users 5 --posts 10 --comments 20
-```
-
-Clear existing sample data and generate new data:
-
-```powershell
-python manage.py seed --clear
-```
-## Admin Panel
-
-Create a superuser:
-
-```powershell
-python manage.py createsuperuser
-```
-
 Start the server:
-
-```powershell
+```
 python manage.py runserver
 ```
 
-Open the admin panel:
+## Homework 3 - ORM Queries
 
-http://127.0.0.1:8000/admin/
+I created 50 Django ORM queries to work with posts, users, comments, categories, and tags.
+
+Run all read-only queries:
+```
+python manage.py queries
+```
+
+Run one query:
+```
+python manage.py queries --number 31
+```
+
+Show SQL:
+```
+python manage.py queries --number 31 --sql
+```
+
+Queries 40-44 change database data, so they should be used carefully.
 
 ## Features
-- Customized Django Unfold admin interface
-- Blog dashboard with statistics
-- User management
-- Post, Category, Tag and Comment management
-- Database seeding using Faker
-
-## Screenshots
-Screenshots are available in `docs/screenshots/`
+Django admin panel
+Blog models
+Sample data with Faker
+50 ORM queries
+Filtering and searching
+Aggregation and annotations
+Database updates

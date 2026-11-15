@@ -4,6 +4,8 @@ from django.contrib.auth.hashers import make_password
 from django.core.management.base import CommandError
 from faker import Faker 
 from django.utils.text import slugify 
+from datetime import timedelta
+from django.utils import timezone
 
 import random 
 
@@ -22,6 +24,10 @@ STAFF_PERCENT=0.10
 PUBLISHED_PERCENT = 0.70
 NO_CATEGORY_PERCENT= 0.10
 MAX_TAGS_PER_POST = 5 
+POST_DAYS_RANGE = 365
+EDITED_POST_PERCENT = 0.30
+MIN_EDIT_DAYS = 1
+MAX_EDIT_DAYS = 30
 POST_PARAGRAPHS = 3 
 
 MIN_COMMENT_SENTENCES = 1 
@@ -193,10 +199,10 @@ class Command(BaseCommand):
                 category = random.choice(all_categories)
 
             status = (
-                "published"
-                if random.random() < PUBLISHED_PERCENT
-                else "draft"
-            )
+    Post.Status.PUBLISHED
+    if random.random() < PUBLISHED_PERCENT
+    else Post.Status.DRAFT
+)
 
             posts_to_create.append(
                 Post(
@@ -209,6 +215,25 @@ class Command(BaseCommand):
                 )
             )
         Post.objects.bulk_create(posts_to_create)
+
+        now = timezone.now()
+
+        for post in posts_to_create:
+            days_ago = random.randint(0, POST_DAYS_RANGE)
+            post.created_at = now - timedelta(days=days_ago)
+            post.updated_at = post.created_at 
+
+            if random.random() < EDITED_POST_PERCENT:
+                edit_days = random.randint(MIN_EDIT_DAYS, MAX_EDIT_DAYS)
+                edited_at = post.created_at + timedelta(days=edit_days)
+
+                if edited_at <= now:
+                    post.updated_at = edited_at
+
+        Post.objects.bulk_update(
+            posts_to_create,
+            ["created_at", "updated_at"],
+        )
 
         for post in posts_to_create:
             number_of_tags= random.randint(
@@ -224,9 +249,9 @@ class Command(BaseCommand):
             )
         )
 
-        published_posts= list (
-            Post.objects.filter(status="published")
-        )
+        published_posts = list(
+    Post.objects.filter(status=Post.Status.PUBLISHED)
+)
 
         if comments_count > 0 and not all_users:
             raise CommandError(
@@ -256,6 +281,24 @@ class Command(BaseCommand):
             )
 
         Comment.objects.bulk_create(comments_to_create)
+        now = timezone.now()
+        for comment in comments_to_create:
+            post_created_at = comment.post.created_at 
+            time_difference = now - post_created_at
+
+            random_seconds = random.uniform(
+                0,
+                time_difference.total_seconds(),
+            )
+
+            comment.created_at = (
+                post_created_at + timedelta(seconds=random_seconds)
+            )
+
+        Comment.objects.bulk_update(
+            comments_to_create,
+            ["created_at"],
+        )
 
         self.stdout.write(
             self.style.SUCCESS(
